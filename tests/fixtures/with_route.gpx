@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="loopr-test" xmlns="http://www.topografix.com/GPX/1/1">
+  <wpt lat="41.1500" lon="-81.3600">
+    <ele>300</ele>
+    <name>Trailhead</name>
+    <type>generic</type>
+  </wpt>
+  <rte>
+    <name>Side Route</name>
+    <rtept lat="41.1490" lon="-81.3600"><ele>290</ele></rtept>
+    <rtept lat="41.1490" lon="-81.3580"><ele>295</ele></rtept>
+    <rtept lat="41.1480" lon="-81.3580"><ele>300</ele></rtept>
+  </rte>
+  <trk>
+    <name>Short Track</name>
+    <trkseg>
+      <trkpt lat="41.1500" lon="-81.3600"><ele>300</ele></trkpt>
+      <trkpt lat="41.1510" lon="-81.3600"><ele>320</ele></trkpt>
+      <trkpt lat="41.1510" lon="-81.3590"><ele>310</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
