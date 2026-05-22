@@ -132,17 +132,20 @@ test('adding a commute extends total distance and writes a -with-commute filenam
 	page
 }) => {
 	await page.goto('/');
-	await page.locator('[data-testid="file-input"]').first().setInputFiles({
-		name: 'simple_loop.gpx',
-		mimeType: 'application/gpx+xml',
-		buffer: gpxBuffer('simple_loop')
-	});
+	await page
+		.locator('[data-testid="file-input"]')
+		.first()
+		.setInputFiles({
+			name: 'simple_loop.gpx',
+			mimeType: 'application/gpx+xml',
+			buffer: gpxBuffer('simple_loop')
+		});
 	const totalBefore = await page.getByTestId('summary-total').textContent();
 
 	await page.getByTestId('commute-toggle').click();
-	const fileInputs = page.locator('[data-testid="file-input"]');
-	await expect(fileInputs).toHaveCount(2);
-	await fileInputs.nth(1).setInputFiles({
+	const commuteInput = page.locator('[data-testid="file-input"]');
+	await expect(commuteInput).toHaveCount(1);
+	await commuteInput.setInputFiles({
 		name: 'commute_segment.gpx',
 		mimeType: 'application/gpx+xml',
 		buffer: gpxBuffer('commute_segment')
