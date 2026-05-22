@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-theme="clay" data-density="regular" data-radius="soft">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			name="description"
+			content="Drop a GPX of one loop, pick how many laps, download a new GPX. Free, private, runs entirely in your browser."
+		/>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
+			rel="stylesheet"
+		/>
+		<script>
+			// Honour prefers-color-scheme on first paint. No UI toggle in v1 —
+			// the design bundle includes dark vars; we just opt in.
+			try {
+				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+					document.documentElement.setAttribute('data-dark', '1');
+				}
+			} catch {
+				/* no-op — older browsers fall back to light. */
+			}
+		</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
