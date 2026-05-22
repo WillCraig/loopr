@@ -312,6 +312,20 @@
 	}
 </script>
 
+<svelte:head>
+	<title>loopr — Free GPX Loop Repeater for Cyclists, Triathletes &amp; Race Organizers</title>
+	<link rel="canonical" href="https://loopr.willcsoftware.com/" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://loopr.willcsoftware.com/" />
+	<meta property="og:title" content="loopr — Free GPX Loop Repeater for Cyclists, Triathletes & Race Organizers" />
+	<meta property="og:description" content="Free GPX loop repeater for cyclists, triathlon bike legs, and crit race courses. Drop a GPX of one circuit, set laps or a distance target, download a stitched GPX for Garmin, Wahoo, or Strava. Runs in your browser." />
+	<meta property="og:image" content="https://loopr.willcsoftware.com/og-image.png" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="loopr — Free GPX Loop Repeater for Cyclists, Triathletes & Race Organizers" />
+	<meta name="twitter:description" content="Free GPX loop repeater for cyclists, triathlon bike legs, and crit race courses. Drop a GPX of one circuit, set laps or a distance target, download a stitched GPX for Garmin, Wahoo, or Strava. Runs in your browser." />
+	<meta name="twitter:image" content="https://loopr.willcsoftware.com/og-image.png" />
+</svelte:head>
+
 <div class="page">
 	<header class="site-header container">
 		<Wordmark size={30} />
