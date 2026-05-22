@@ -22,8 +22,6 @@ Live at [loopr.willcsoftware.com](https://loopr.willcsoftware.com).
 - Vitest + Playwright
 - pnpm
 
-No backend. No analytics. No state-management library. No map preview.
-
 ## Develop
 
 ```sh
