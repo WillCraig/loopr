@@ -40,27 +40,4 @@ pnpm build        # static output → build/
 pnpm preview      # serves build/ at :4173
 ```
 
-## Project layout
-
-```
-src/lib/gpx/         # framework-agnostic GPX library (pure TypeScript)
-src/lib/components/  # Svelte 5 components ported from the design bundle
-src/routes/+page.svelte   # wires the components to the gpx library
-tests/fixtures/      # hand-authored GPX inputs
-tests/unit/          # vitest specs for the gpx library
-tests/e2e/           # playwright end-to-end against the built site
-.github/workflows/   # test.yml runs on push; deploy.yml ships build/ to Pages
-static/CNAME         # custom domain
-```
-
-`src/lib/gpx/` never imports from Svelte — components consume it.
-
-## Deploy
-
-`deploy.yml` runs on pushes to `main`, builds the static site, and uploads it to GitHub Pages. In repo settings, set Pages source to "GitHub Actions" once; the workflow handles the rest.
-
-DNS: a `CNAME` for `loopr` pointing at `willcraig.github.io`. GitHub provisions HTTPS automatically once it resolves.
-
-## License
-
 MIT, © 2026 WillC Software House.
