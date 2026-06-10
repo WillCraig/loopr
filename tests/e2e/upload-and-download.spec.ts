@@ -162,6 +162,73 @@ test('adding a commute extends total distance and writes a -with-commute filenam
 	expect(download.suggestedFilename()).toBe('simple_loop-x2-with-commute.gpx');
 });
 
+test('point-to-point route shows the out-and-back callout, defaulted on', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('[data-testid="file-input"]').setInputFiles({
+		name: 'point_to_point.gpx',
+		mimeType: 'application/gpx+xml',
+		buffer: gpxBuffer('point_to_point')
+	});
+	await expect(page.getByTestId('oab-callout')).toBeVisible();
+	await expect(page.getByTestId('oab-on')).toHaveAttribute('aria-checked', 'true');
+	await expect(page.getByTestId('oab-roundtrip')).toContainText(/round trip/i);
+	// Laps default to a single out-and-back, and the summary reflects it.
+	await expect(page.getByTestId('laps-input')).toHaveValue('1');
+	await expect(page.getByTestId('summary-laps')).toHaveText('1');
+	await expect(page.getByTestId('summary-oab-chip')).toBeVisible();
+	await expect(page.getByTestId('summary-name')).toContainText('River Path North out & back');
+});
+
+test('loop route never shows the out-and-back callout', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('[data-testid="file-input"]').setInputFiles({
+		name: 'simple_loop.gpx',
+		mimeType: 'application/gpx+xml',
+		buffer: gpxBuffer('simple_loop')
+	});
+	await expect(page.getByTestId('summary')).toBeVisible();
+	await expect(page.getByTestId('oab-callout')).toHaveCount(0);
+});
+
+test('switching the callout to one-way undoes the conversion', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('[data-testid="file-input"]').setInputFiles({
+		name: 'point_to_point.gpx',
+		mimeType: 'application/gpx+xml',
+		buffer: gpxBuffer('point_to_point')
+	});
+	const total = page.getByTestId('summary-total');
+	await expect(total).toContainText('1.4'); // 2 × 0.69 mi round trip
+	await page.getByTestId('oab-off').click();
+	await expect(page.getByTestId('oab-warning')).toContainText(/jump/i);
+	await expect(total).toContainText('0.7'); // back to the one-way distance
+	await expect(page.getByTestId('summary-oab-chip')).toHaveCount(0);
+});
+
+test('out-and-back download mirrors the route and names it accordingly', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('[data-testid="file-input"]').setInputFiles({
+		name: 'point_to_point.gpx',
+		mimeType: 'application/gpx+xml',
+		buffer: gpxBuffer('point_to_point')
+	});
+	await expect(page.getByTestId('download-button')).toBeEnabled();
+	const downloadPromise = page.waitForEvent('download');
+	await page.getByTestId('download-button').click();
+	const download = await downloadPromise;
+	expect(download.suggestedFilename()).toBe('point_to_point-out-and-back.gpx');
+	const stream = await download.createReadStream();
+	const chunks: Buffer[] = [];
+	for await (const chunk of stream) chunks.push(chunk as Buffer);
+	const xml = Buffer.concat(chunks).toString('utf8');
+	expect(xml).toContain('River Path North out &amp; back');
+	// 5 one-way points mirrored with the turnaround deduped = 9 trkpts.
+	const trkptCount = (xml.match(/<trkpt/g) ?? []).length;
+	expect(trkptCount).toBe(9);
+	// The default marker checkbox adds a turnaround waypoint at B.
+	expect(xml).toContain('<name>Turnaround</name>');
+});
+
 test('minDistance mode shows live "→ N laps → X mi" hint', async ({ page }) => {
 	await page.goto('/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({

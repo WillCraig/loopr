@@ -517,6 +517,107 @@ button {
 	margin-top: 18px;
 }
 
+/* ── Out-and-back callout ────────────────────────────────────────────── */
+
+.oab {
+	margin-top: 16px;
+	padding: 24px 28px 20px;
+	border-left: 3px solid var(--accent);
+	background: var(--accent-soft);
+	border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+}
+
+.oab-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	flex-wrap: wrap;
+}
+
+.oab-headings {
+	min-width: 0;
+	max-width: 52ch;
+}
+
+.oab-title {
+	font-size: 19px;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
+	margin: 10px 0 0;
+	text-wrap: balance;
+}
+
+.oab-sub {
+	margin: 8px 0 0;
+	font-size: 14px;
+	color: var(--ink-2);
+	line-height: 1.45;
+}
+
+.oab-toggle {
+	flex-shrink: 0;
+	background: var(--bg);
+	border-radius: 999px;
+}
+
+.oab-diagram {
+	display: block;
+	width: 100%;
+	max-width: 360px;
+	margin-top: 20px;
+	overflow: visible;
+}
+
+.oab-diagram .oab-out {
+	stroke: var(--ink-2);
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.oab-diagram .oab-return {
+	stroke: var(--accent);
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-dasharray: 5 6;
+	opacity: 0.25;
+	transition: opacity 0.25s ease;
+}
+
+.oab-diagram[data-on='1'] .oab-return {
+	opacity: 1;
+}
+
+.oab-diagram .oab-dot-a {
+	fill: var(--ink);
+}
+
+.oab-diagram .oab-dot-b {
+	fill: var(--bg);
+	stroke: var(--accent);
+	stroke-width: 2;
+}
+
+.oab-diagram .oab-label {
+	font-family: 'Geist Mono', ui-monospace, monospace;
+	font-size: 11px;
+	letter-spacing: 0.1em;
+	fill: var(--ink-3);
+}
+
+.oab .live-compute {
+	margin-top: 16px;
+}
+
+.oab-warn {
+	margin: 16px 0 0;
+	font-size: 14px;
+	color: var(--ink-2);
+}
+
 /* ── Error message ───────────────────────────────────────────────────── */
 
 .err {
@@ -864,6 +965,21 @@ button {
 	color: var(--ink);
 	margin-bottom: 28px;
 	letter-spacing: -0.01em;
+}
+
+.summary-oab-chip {
+	display: inline-block;
+	vertical-align: 2px;
+	margin-left: 10px;
+	padding: 3px 10px;
+	border: 1px solid var(--accent);
+	border-radius: 999px;
+	font-family: 'Geist Mono', ui-monospace, monospace;
+	font-size: 10.5px;
+	font-weight: 500;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--accent);
 }
 
 .summary-commute {

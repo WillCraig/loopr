@@ -7,6 +7,8 @@
 	export interface SummaryView {
 		name: string;
 		laps: number;
+		/** True when each lap is an out-and-back (A-B-A) conversion. */
+		outAndBack?: boolean;
 		lapDistanceMeters: number;
 		lapGainMeters: number;
 		lapLossMeters: number;
@@ -34,7 +36,12 @@
 	{@const totalLossMeters = view.lapLossMeters * view.laps + (c ? c.gainMeters + c.lossMeters : 0)}
 	<div class="summary" data-testid="summary">
 		<div class="summary-label">Your ride</div>
-		<div class="summary-name" data-testid="summary-name">{view.name}</div>
+		<div class="summary-name" data-testid="summary-name">
+			{view.name}
+			{#if view.outAndBack}
+				<span class="summary-oab-chip" data-testid="summary-oab-chip">Out &amp; back</span>
+			{/if}
+		</div>
 		{#if c}
 			<div class="summary-commute" data-testid="summary-commute">
 				+ {fmtDistance(c.distanceMeters, units)}
@@ -79,7 +86,13 @@
 			<div class="stat">
 				<span class="stat-label">Laps</span>
 				<span class="stat-value" data-testid="summary-laps">{view.laps}</span>
-				<span class="stat-sub">{view.laps === 1 ? 'single loop' : 'repetitions'}</span>
+				<span class="stat-sub"
+					>{view.laps === 1
+						? view.outAndBack
+							? 'there and back'
+							: 'single loop'
+						: 'repetitions'}</span
+				>
 			</div>
 		</div>
 	</div>

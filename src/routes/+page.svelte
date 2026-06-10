@@ -6,9 +6,13 @@
 		NoTrackError,
 		TooFewPointsError,
 		computeSummary,
+		gpxIsPointToPoint,
+		isPointToPoint,
+		outAndBack,
 		parseGpx,
 		repeat,
-		serializeGpx
+		serializeGpx,
+		startEndGapMeters
 	} from '$lib/gpx';
 	import type { Gpx, Units } from '$lib/gpx';
 	import { distToMeters, safeFilename } from '$lib/format';
@@ -19,6 +23,7 @@
 	import type { DropError, DropState, LoadedSummary } from '$lib/components/DropZone.svelte';
 	// import HowToUse from '$lib/components/HowToUse.svelte'; // re-add when the commented-out section below is restored
 	import LapConfig from '$lib/components/LapConfig.svelte';
+	import OutAndBackCallout from '$lib/components/OutAndBackCallout.svelte';
 	import type { Mode } from '$lib/components/LapConfig.svelte';
 	import PrivacyCallout from '$lib/components/PrivacyCallout.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
@@ -50,11 +55,28 @@
 
 	const activeCommute = $derived(commuteEnabled ? commuteParsed : null);
 
+	// ── Out-and-back (A-B → A-B-A) ───────────────────────────────────────────
+	let outAndBackOn = $state(false);
+	const isP2P = $derived(parsed ? gpxIsPointToPoint(parsed) : false);
+	const oabActive = $derived(isP2P && outAndBackOn);
+	const p2pGapMeters = $derived.by(() => {
+		if (!parsed) return 0;
+		const t = parsed.tracks.find(isPointToPoint);
+		return t ? startEndGapMeters(t) : 0;
+	});
+	/** What every downstream consumer (summary, laps, download) sees: the
+	 *  dropped GPX with P2P tracks mirrored into A-B-A when the toggle is on. */
+	const effectiveGpx = $derived(
+		parsed && oabActive ? outAndBack(parsed, { turnaround: addMarkers }) : parsed
+	);
+
 	// ── Derived state ────────────────────────────────────────────────────────
-	const trackSummary = $derived(parsed ? (computeSummary(parsed, units).tracks[0] ?? null) : null);
+	const trackSummary = $derived(
+		effectiveGpx ? (computeSummary(effectiveGpx, units).tracks[0] ?? null) : null
+	);
 	const lapDistanceMeters = $derived.by(() => {
-		if (!parsed) return null;
-		const s = computeSummary(parsed, 'km').tracks[0];
+		if (!effectiveGpx) return null;
+		const s = computeSummary(effectiveGpx, 'km').tracks[0];
 		if (!s) return null;
 		// distancePerLap is in km when units=km → convert back to meters.
 		return s.distancePerLap * 1000;
@@ -73,7 +95,13 @@
 	const overCap = $derived(effectiveLaps > 100);
 
 	const sourceTrackName = $derived(parsed?.tracks[0]?.name ?? 'Repeated route');
-	const defaultRidename = $derived(`${sourceTrackName} x${effectiveLaps}`);
+	const defaultRidename = $derived.by(() => {
+		if (oabActive) {
+			const base = `${sourceTrackName} out & back`;
+			return effectiveLaps > 1 ? `${base} x${effectiveLaps}` : base;
+		}
+		return `${sourceTrackName} x${effectiveLaps}`;
+	});
 	const ridename = $derived(customName.trim() || defaultRidename);
 
 	const dropState: DropState = $derived(
@@ -84,13 +112,15 @@
 		commuteLoading ? 'loading' : commuteError ? 'error' : commuteParsed ? 'loaded' : 'empty'
 	);
 
+	// Always describes the file as dropped (one-way for P2P routes); the
+	// out-and-back callout and the Review section communicate the conversion.
 	const loadedSummary: LoadedSummary | null = $derived.by(() => {
-		if (!parsed || !lapDistanceMeters) return null;
+		if (!parsed) return null;
 		const km = computeSummary(parsed, 'km').tracks[0];
 		if (!km) return null;
 		return {
 			filename,
-			distanceMeters: lapDistanceMeters,
+			distanceMeters: km.totalDistance * 1000,
 			gainMeters: km.elevationGain,
 			pointCount: parsed.tracks.reduce((sum, t) => sum + t.points.length, 0)
 		};
@@ -114,13 +144,14 @@
 	);
 
 	const summaryView: SummaryView | null = $derived.by(() => {
-		if (!parsed || !trackSummary) return null;
-		const summary = computeSummary(parsed, 'km', activeCommute ?? undefined);
+		if (!effectiveGpx || !trackSummary) return null;
+		const summary = computeSummary(effectiveGpx, 'km', activeCommute ?? undefined);
 		const km = summary.tracks[0];
 		if (!km) return null;
 		return {
 			name: ridename,
 			laps: effectiveLaps,
+			outAndBack: oabActive,
 			lapDistanceMeters: km.distancePerLap * 1000,
 			lapGainMeters: km.elevationGain,
 			lapLossMeters: km.elevationLoss,
@@ -223,6 +254,15 @@
 		}
 		parsed = result.gpx;
 		filename = result.name;
+		applyOutAndBackDefaults(result.gpx);
+	}
+
+	/** P2P routes default to out-and-back with a single lap — the zero-click
+	 *  correct result. (Repeating a raw A-B teleports from B back to A.) */
+	function applyOutAndBackDefaults(gpx: Gpx) {
+		const p2p = gpxIsPointToPoint(gpx);
+		outAndBackOn = p2p;
+		if (p2p) laps = 1;
 	}
 
 	async function handleSample() {
@@ -234,6 +274,7 @@
 		try {
 			parsed = parseGpx(sampleGpxText());
 			filename = SAMPLE_FILENAME;
+			applyOutAndBackDefaults(parsed);
 		} catch (e) {
 			error = errorFor(e, SAMPLE_FILENAME);
 		} finally {
@@ -247,6 +288,7 @@
 		error = null;
 		customName = '';
 		renameOpen = false;
+		outAndBackOn = false;
 	}
 
 	async function handleCommuteFile(file: File) {
@@ -272,20 +314,24 @@
 
 	// ── Download ────────────────────────────────────────────────────────────
 	function handleDownload() {
-		if (!parsed || !downloadEnabled) return;
+		if (!effectiveGpx || !downloadEnabled) return;
 		try {
-			const repeated = repeat(parsed, {
+			const repeated = repeat(effectiveGpx, {
 				mode:
-					mode === 'distance'
-						? { type: 'count', n: effectiveLaps }
-						: { type: 'count', n: laps },
+					mode === 'distance' ? { type: 'count', n: effectiveLaps } : { type: 'count', n: laps },
 				lapWaypoints: addMarkers,
-				nameOverride: customName.trim() || undefined,
+				// Always override so the track name in the file matches the UI.
+				nameOverride: ridename,
 				commute: activeCommute ?? undefined
 			});
 			const xml = serializeGpx(repeated, pkgVersion);
 			const stem = filename.replace(/\.gpx$/i, '');
-			const suffix = activeCommute ? `-x${effectiveLaps}-with-commute` : `-x${effectiveLaps}`;
+			const lapsPart = oabActive
+				? effectiveLaps > 1
+					? `-out-and-back-x${effectiveLaps}`
+					: '-out-and-back'
+				: `-x${effectiveLaps}`;
+			const suffix = activeCommute ? `${lapsPart}-with-commute` : lapsPart;
 			const outName = `${safeFilename(`${stem}${suffix}`)}.gpx`;
 			const blob = new Blob([xml], { type: 'application/gpx+xml' });
 			const url = URL.createObjectURL(blob);
@@ -317,12 +363,24 @@
 	<link rel="canonical" href="https://loopr.willcsoftware.com/" />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://loopr.willcsoftware.com/" />
-	<meta property="og:title" content="loopr — Free GPX Loop Repeater for Cyclists, Triathletes & Race Organizers" />
-	<meta property="og:description" content="Free GPX loop repeater for cyclists, triathlon bike legs, and crit race courses. Drop a GPX of one circuit, set laps or a distance target, download a stitched GPX for Garmin, Wahoo, or Strava. Runs in your browser." />
+	<meta
+		property="og:title"
+		content="loopr — Free GPX Loop Repeater for Cyclists, Triathletes & Race Organizers"
+	/>
+	<meta
+		property="og:description"
+		content="Free GPX loop repeater for cyclists, triathlon bike legs, and crit race courses. Drop a GPX of one circuit, set laps or a distance target, download a stitched GPX for Garmin, Wahoo, or Strava. Runs in your browser."
+	/>
 	<meta property="og:image" content="https://loopr.willcsoftware.com/og-image.png" />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="loopr — Free GPX Loop Repeater for Cyclists, Triathletes & Race Organizers" />
-	<meta name="twitter:description" content="Free GPX loop repeater for cyclists, triathlon bike legs, and crit race courses. Drop a GPX of one circuit, set laps or a distance target, download a stitched GPX for Garmin, Wahoo, or Strava. Runs in your browser." />
+	<meta
+		name="twitter:title"
+		content="loopr — Free GPX Loop Repeater for Cyclists, Triathletes & Race Organizers"
+	/>
+	<meta
+		name="twitter:description"
+		content="Free GPX loop repeater for cyclists, triathlon bike legs, and crit race courses. Drop a GPX of one circuit, set laps or a distance target, download a stitched GPX for Garmin, Wahoo, or Strava. Runs in your browser."
+	/>
 	<meta name="twitter:image" content="https://loopr.willcsoftware.com/og-image.png" />
 </svelte:head>
 
@@ -356,6 +414,15 @@
 			onSample={handleSample}
 			onClear={handleClear}
 		/>
+		{#if parsed && isP2P}
+			<OutAndBackCallout
+				gapMeters={p2pGapMeters}
+				oneWayMeters={loadedSummary?.distanceMeters ?? 0}
+				{units}
+				on={outAndBackOn}
+				onToggle={(v) => (outAndBackOn = v)}
+			/>
+		{/if}
 	</section>
 
 	<section class="section container">
@@ -399,6 +466,7 @@
 			{laps}
 			{minDistance}
 			{units}
+			outAndBack={oabActive}
 			{lapDistanceMeters}
 			{commuteDistanceMeters}
 			{minDistInclCommute}

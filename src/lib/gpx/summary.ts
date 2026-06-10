@@ -1,6 +1,6 @@
+import { haversine } from './geo';
 import type { CommuteSummary, Gpx, Summary, TrackSummary, Units } from './types';
 
-const EARTH_RADIUS_M = 6371008.8;
 const M_PER_MI = 1609.344;
 const M_PER_FT = 0.3048;
 const GRADIENT_WINDOW_M = 100;
@@ -113,14 +113,4 @@ function distanceInUnits(meters: number, units: Units): number {
 
 function elevationInUnits(meters: number, units: Units): number {
 	return units === 'mi' ? meters / M_PER_FT : meters;
-}
-
-function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
-	const toRad = (d: number) => (d * Math.PI) / 180;
-	const dLat = toRad(lat2 - lat1);
-	const dLon = toRad(lon2 - lon1);
-	const a =
-		Math.sin(dLat / 2) ** 2 +
-		Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-	return 2 * EARTH_RADIUS_M * Math.asin(Math.sqrt(a));
 }

@@ -10,6 +10,8 @@
 		laps: number;
 		minDistance: number;
 		units: Units;
+		/** True when the loaded route is being ridden out-and-back (A-B-A). */
+		outAndBack?: boolean;
 		/** Lap distance in meters, when a route is loaded. */
 		lapDistanceMeters: number | null;
 		/** Commute one-way distance in meters, when a commute is active. */
@@ -32,6 +34,7 @@
 		laps,
 		minDistance,
 		units,
+		outAndBack = false,
 		lapDistanceMeters,
 		commuteDistanceMeters,
 		minDistInclCommute,
@@ -114,7 +117,15 @@
 						data-testid="laps-input"
 						oninput={(e) => onLaps(clampLaps((e.currentTarget as HTMLInputElement).value))}
 					/>
-					<span class="bignum-suffix">{laps === 1 ? 'lap' : 'laps'}</span>
+					<span class="bignum-suffix"
+						>{outAndBack
+							? laps === 1
+								? 'out & back'
+								: 'out & backs'
+							: laps === 1
+								? 'lap'
+								: 'laps'}</span
+					>
 					<div class="stepper">
 						<button
 							type="button"
@@ -141,7 +152,11 @@
 		{:else}
 			<div>
 				{#if commuteDistanceMeters !== null}
-					<div class="distance-scope" role="radiogroup" aria-label="What the distance target includes">
+					<div
+						class="distance-scope"
+						role="radiogroup"
+						aria-label="What the distance target includes"
+					>
 						<label class="scope-option">
 							<input
 								type="radio"
@@ -203,7 +218,11 @@
 			/>
 			<span class="box"></span>
 			<span class="check-body">
-				<span class="check-label">Add a marker at the start of each lap</span>
+				<span class="check-label"
+					>{outAndBack
+						? 'Add markers at the turnaround and each lap start'
+						: 'Add a marker at the start of each lap'}</span
+				>
 				<span class="check-help"
 					>Your bike computer can show these so you know which lap you're on.</span
 				>

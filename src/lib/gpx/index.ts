@@ -4,6 +4,7 @@
  */
 
 export { parseGpx } from './parser';
+export { gpxIsPointToPoint, isPointToPoint, outAndBack, startEndGapMeters } from './outandback';
 export { repeat } from './repeat';
 export { serializeGpx } from './serialize';
 export { computeSummary } from './summary';
