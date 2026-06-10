@@ -582,9 +582,13 @@ button {
 	stroke-width: 1.8;
 	stroke-linecap: round;
 	stroke-linejoin: round;
-	stroke-dasharray: 5 6;
 	opacity: 0.25;
 	transition: opacity 0.25s ease;
+}
+
+/* Dash only the shaft — a dashed arrowhead loses its tip to a dash gap. */
+.oab-diagram .oab-return-line {
+	stroke-dasharray: 5 6;
 }
 
 .oab-diagram[data-on='1'] .oab-return {

@@ -52,8 +52,8 @@
 		<path class="oab-out" d="M283 15.5 L292 20 L283 24.5" fill="none" />
 		<!-- return leg (lights up when the toggle is on) -->
 		<g class="oab-return">
-			<path d="M296 26 Q296 42 280 42 L46 42" fill="none" />
-			<path d="M53 37.5 L44 42 L53 46.5" fill="none" />
+			<path class="oab-return-line" d="M296 26 Q296 42 280 42 L52 42" fill="none" />
+			<path class="oab-return-head" d="M53 37.5 L44 42 L53 46.5" fill="none" />
 		</g>
 		<circle class="oab-dot-a" cx="20" cy="20" r="4.5" />
 		<circle class="oab-dot-b" cx="296" cy="20" r="4.5" />

@@ -205,6 +205,26 @@ test('switching the callout to one-way undoes the conversion', async ({ page }) 
 	await expect(page.getByTestId('summary-oab-chip')).toHaveCount(0);
 });
 
+test('return-leg arrowhead is solid so its point survives the dash pattern', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('[data-testid="file-input"]').setInputFiles({
+		name: 'point_to_point.gpx',
+		mimeType: 'application/gpx+xml',
+		buffer: gpxBuffer('point_to_point')
+	});
+	await expect(page.getByTestId('oab-callout')).toBeVisible();
+	// The chevron is ~20 units long; a dashed stroke puts its tip in a gap.
+	const headDash = await page
+		.locator('[data-testid="oab-callout"] .oab-return path:last-of-type')
+		.evaluate((el) => getComputedStyle(el).strokeDasharray);
+	expect(headDash).toBe('none');
+	// The shaft must stay dashed — that's the visual language for "return leg".
+	const shaftDash = await page
+		.locator('[data-testid="oab-callout"] .oab-return path:first-of-type')
+		.evaluate((el) => getComputedStyle(el).strokeDasharray);
+	expect(shaftDash).not.toBe('none');
+});
+
 test('out-and-back download mirrors the route and names it accordingly', async ({ page }) => {
 	await page.goto('/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
