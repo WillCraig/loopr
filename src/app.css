@@ -1,6 +1,5 @@
 /* loopr — base styles and theme tokens
  * Earth-toned, editorial, banner-driven. PNS / Cannondale / gravel.
- * Ported verbatim from the Claude Design handoff bundle.
  */
 
 :root {
@@ -166,6 +165,17 @@ button {
 	font-family: inherit;
 }
 
+button,
+a,
+input {
+	-webkit-tap-highlight-color: transparent;
+}
+
+:where(button, a, input, [tabindex]):focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+}
+
 /* ── Layout primitives ───────────────────────────────────────────────── */
 
 .page {
@@ -240,6 +250,32 @@ button {
 
 .site-header .wordmark {
 	flex-shrink: 0;
+}
+
+.wordmark {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--wordmark-gap);
+	font-family: 'Geist', sans-serif;
+	font-size: var(--wordmark-size);
+	font-weight: 600;
+	letter-spacing: -0.04em;
+	line-height: 1;
+}
+
+.wordmark-letter {
+	display: block;
+	transform: translateY(-0.01em);
+}
+
+.wordmark-loops {
+	display: block;
+	flex: none;
+	overflow: visible;
+}
+
+.wordmark-pr {
+	margin-left: -0.035em;
 }
 
 .units-toggle {

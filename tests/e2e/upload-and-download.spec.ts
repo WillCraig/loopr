@@ -262,3 +262,17 @@ test('minDistance mode shows live "→ N laps → X mi" hint', async ({ page }) 
 	await expect(hint).toContainText(/laps/i);
 	await expect(hint).toContainText(/total/i);
 });
+
+test('elevation mode shows live climbing and Everest hint', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('[data-testid="file-input"]').setInputFiles({
+		name: 'simple_loop.gpx',
+		mimeType: 'application/gpx+xml',
+		buffer: gpxBuffer('simple_loop')
+	});
+	await page.getByRole('radio', { name: 'Minimum climbing' }).click();
+	const hint = page.getByTestId('elevation-hint');
+	await expect(hint).toBeVisible();
+	await expect(hint).toContainText(/laps/i);
+	await expect(hint).toContainText(/Everest/i);
+});

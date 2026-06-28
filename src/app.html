@@ -29,15 +29,10 @@
 				]
 			}
 		</script>
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
-			rel="stylesheet"
-		/>
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
 		<script>
-			// Honour prefers-color-scheme on first paint. No UI toggle in v1 —
-			// the design bundle includes dark vars; we just opt in.
+			// Honour prefers-color-scheme on first paint. No UI toggle in v1;
+			// the route-workshop palette follows the rider's system setting.
 			try {
 				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
 					document.documentElement.setAttribute('data-dark', '1');
@@ -48,8 +43,11 @@
 		</script>
 		%sveltekit.head%
 	</head>
-	<script data-goatcounter="https://willcraig.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+	<script
+		data-goatcounter="https://willcraig.goatcounter.com/count"
+		async
+		src="//gc.zgo.at/count.js"
+	></script>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
