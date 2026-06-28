@@ -15,7 +15,7 @@
 		startEndGapMeters
 	} from '$lib/gpx';
 	import type { Gpx, Units } from '$lib/gpx';
-	import { distToMeters, safeFilename } from '$lib/format';
+	import { distToMeters, elevToMeters, safeFilename } from '$lib/format';
 	import { SAMPLE_FILENAME, sampleGpxText } from '$lib/sample';
 
 	import DownloadButton from '$lib/components/DownloadButton.svelte';
@@ -46,6 +46,8 @@
 	let customName = $state('');
 	let renameOpen = $state(false);
 	let minDistInclCommute = $state(false);
+	let minElevation = $state(29029); // Everest in feet (matches default units = 'mi')
+	let minElevInclCommute = $state(false);
 
 	let commuteEnabled = $state(false);
 	let commuteParsed = $state<Gpx | null>(null);
@@ -82,16 +84,43 @@
 		return s.distancePerLap * 1000;
 	});
 
-	const computedLaps = $derived.by(() => {
-		if (mode !== 'distance' || !lapDistanceMeters || lapDistanceMeters <= 0) return null;
-		let targetMeters = distToMeters(minDistance, units);
-		if (minDistInclCommute && commuteDistanceMeters) {
-			targetMeters = Math.max(0, targetMeters - 2 * commuteDistanceMeters);
-		}
-		return Math.max(1, Math.ceil(targetMeters / lapDistanceMeters));
+	const lapGainMeters = $derived.by(() => {
+		if (!effectiveGpx) return null;
+		const s = computeSummary(effectiveGpx, 'km').tracks[0];
+		if (!s) return null;
+		// elevationGain in 'km' units is meters (identity branch of elevationInUnits)
+		return s.elevationGain;
 	});
 
-	const effectiveLaps = $derived(mode === 'distance' ? (computedLaps ?? 1) : laps);
+	const commuteGainRoundTripMeters = $derived.by(() => {
+		if (!commuteEnabled || !commuteParsed) return null;
+		const s = computeSummary(commuteParsed, 'km').tracks[0];
+		if (!s) return null;
+		// Round trip: climbing out (gain) + climbing back (loss reversed to gain)
+		return s.elevationGain + s.elevationLoss;
+	});
+
+	const computedLaps = $derived.by(() => {
+		if (mode === 'distance') {
+			if (!lapDistanceMeters || lapDistanceMeters <= 0) return null;
+			let targetMeters = distToMeters(minDistance, units);
+			if (minDistInclCommute && commuteDistanceMeters) {
+				targetMeters = Math.max(0, targetMeters - 2 * commuteDistanceMeters);
+			}
+			return Math.max(1, Math.ceil(targetMeters / lapDistanceMeters));
+		}
+		if (mode === 'elevation') {
+			if (!lapGainMeters || lapGainMeters <= 0) return null;
+			let targetMeters = elevToMeters(minElevation, units);
+			if (minElevInclCommute && commuteGainRoundTripMeters) {
+				targetMeters = Math.max(0, targetMeters - commuteGainRoundTripMeters);
+			}
+			return Math.max(1, Math.ceil(targetMeters / lapGainMeters));
+		}
+		return null;
+	});
+
+	const effectiveLaps = $derived(mode === 'laps' ? laps : (computedLaps ?? 1));
 	const overCap = $derived(effectiveLaps > 100);
 
 	const sourceTrackName = $derived(parsed?.tracks[0]?.name ?? 'Repeated route');
@@ -175,6 +204,10 @@
 		} else if (overCap) {
 			downloadEnabled = false;
 			disabledReason = 'Too many laps. Lower the target or pick a longer loop.';
+		} else if (mode === 'elevation' && (!lapGainMeters || lapGainMeters <= 0)) {
+			downloadEnabled = false;
+			disabledReason =
+				'This loop has no recorded elevation data. Switch to laps or distance, or use a route that includes elevation.';
 		} else {
 			downloadEnabled = true;
 			disabledReason = '';
@@ -317,8 +350,7 @@
 		if (!effectiveGpx || !downloadEnabled) return;
 		try {
 			const repeated = repeat(effectiveGpx, {
-				mode:
-					mode === 'distance' ? { type: 'count', n: effectiveLaps } : { type: 'count', n: laps },
+				mode: { type: 'count', n: effectiveLaps },
 				lapWaypoints: addMarkers,
 				// Always override so the track name in the file matches the UI.
 				nameOverride: ridename,
@@ -470,6 +502,10 @@
 			{lapDistanceMeters}
 			{commuteDistanceMeters}
 			{minDistInclCommute}
+			{minElevation}
+			{minElevInclCommute}
+			{lapGainMeters}
+			commuteGainMeters={commuteGainRoundTripMeters}
 			{addMarkers}
 			{customName}
 			nameSuggestion={defaultRidename}
@@ -478,6 +514,8 @@
 			onLaps={(n) => (laps = n)}
 			onMinDistance={(v) => (minDistance = v)}
 			onMinDistInclCommute={(v) => (minDistInclCommute = v)}
+			onMinElevation={(v) => (minElevation = v)}
+			onMinElevInclCommute={(v) => (minElevInclCommute = v)}
 			onAddMarkers={(v) => (addMarkers = v)}
 			onCustomName={(v) => (customName = v)}
 			onRenameOpen={(v) => (renameOpen = v)}

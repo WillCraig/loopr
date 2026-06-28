@@ -34,6 +34,11 @@ export function distToMeters(value: number, units: Units): number {
 	return units === 'mi' ? value * M_PER_MI : value * 1000;
 }
 
+/** Convert an elevation value expressed in `units` back to meters. */
+export function elevToMeters(value: number, units: Units): number {
+	return units === 'mi' ? value * 0.3048 : value;
+}
+
 /**
  * Make a filename safe-ish. Same rule as the prototype: keep word chars,
  * dashes, dots, spaces; replace everything else with `_`.
