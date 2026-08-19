@@ -35,9 +35,22 @@ pnpm dev
 ```sh
 pnpm check        # svelte-check + tsc
 pnpm test:unit    # vitest, GPX library
-pnpm test:e2e     # playwright, full UI
+pnpm test:e2e     # functional, accessibility, responsive, and visual browser suite
+pnpm test:e2e:functional # all browser checks except screenshot comparisons
+pnpm test:visual  # compare committed screenshots across desktop and mobile browsers
+pnpm validate     # complete pre-push check: types, lint, unit, UI, and visual tests
 pnpm build        # static output → build/
 pnpm preview      # serves build/ at :4173
 ```
+
+The UI contract runs in desktop Chromium, Firefox, and WebKit, plus Pixel/Chrome and
+iPhone/WebKit profiles. WebKit is the repeatable CI proxy for Safari. Before changing the UI
+intentionally, refresh and inspect baselines on macOS with `pnpm test:visual:update`, then commit
+the images under `tests/e2e/__screenshots__`. CI compares them on the macOS 26 arm64 runner to
+minimize platform-specific rendering differences from local Apple Silicon Macs.
+
+Playwright's WebKit build is not the exact Safari binary shipped by macOS. For a release-level
+Safari check, run the suite locally on macOS and do a short manual pass in the current Safari;
+CI still catches the large majority of WebKit-specific layout and behavior regressions on every PR.
 
 MIT, © 2026 WillC Software House.

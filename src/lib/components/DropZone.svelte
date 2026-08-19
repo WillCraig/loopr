@@ -52,13 +52,6 @@
 		dragging = false;
 		pickFiles(event.dataTransfer?.files);
 	}
-
-	function onKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Enter' || event.key === ' ') {
-			event.preventDefault();
-			inputEl?.click();
-		}
-	}
 </script>
 
 {#if dropState === 'loaded' && loaded}
@@ -82,15 +75,13 @@
 		</div>
 	</div>
 {:else}
-	<div>
-		<div
+	<div class="dropzone-wrap">
+		<button
+			type="button"
 			class="dropzone {dragging ? 'is-dragging' : ''} {dropState === 'error' ? 'is-error' : ''}"
-			tabindex="0"
-			role="button"
 			aria-label="Drop your GPX file here, or click to choose"
 			data-testid="dropzone"
 			onclick={() => inputEl?.click()}
-			onkeydown={onKeyDown}
 			ondragover={(e) => {
 				e.preventDefault();
 				dragging = true;
@@ -115,7 +106,7 @@
 					stroke-linecap="round"
 				/>
 			</svg>
-			<h3 class="dz-title">
+			<span class="dz-title">
 				{#if dragging}
 					Drop it
 				{:else if dropState === 'loading'}
@@ -123,8 +114,8 @@
 				{:else}
 					Drop your route here
 				{/if}
-			</h3>
-			<p class="dz-sub">
+			</span>
+			<span class="dz-sub">
 				{#if dragging}
 					&nbsp;
 				{:else if dropState === 'loading'}
@@ -132,34 +123,26 @@
 				{:else}
 					or click to choose a file
 				{/if}
-			</p>
-			<div class="dz-formats">
+			</span>
+			<span class="dz-formats">
 				<span>.gpx</span>
 				<span>·</span>
 				<span>up to 50,000 points</span>
-			</div>
-			{#if dropState !== 'loading' && showSample && onSample}
-				<button
-					class="dz-sample"
-					type="button"
-					data-testid="sample-button"
-					onclick={(e) => {
-						e.stopPropagation();
-						onSample?.();
-					}}
-				>
-					Try with a sample route →
-				</button>
-			{/if}
-			<input
-				bind:this={inputEl}
-				type="file"
-				accept=".gpx,application/gpx+xml,application/xml,text/xml"
-				style="display: none"
-				data-testid="file-input"
-				onchange={(e) => pickFiles((e.currentTarget as HTMLInputElement).files)}
-			/>
-		</div>
+			</span>
+		</button>
+		<input
+			bind:this={inputEl}
+			type="file"
+			accept=".gpx,application/gpx+xml,application/xml,text/xml"
+			style="display: none"
+			data-testid="file-input"
+			onchange={(e) => pickFiles((e.currentTarget as HTMLInputElement).files)}
+		/>
+		{#if dropState !== 'loading' && showSample && onSample}
+			<button class="dz-sample" type="button" data-testid="sample-button" onclick={onSample}>
+				Try with a sample route →
+			</button>
+		{/if}
 		{#if dropState === 'loading'}
 			<div class="loading-bar" aria-hidden="true"></div>
 		{/if}

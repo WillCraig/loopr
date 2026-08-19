@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  functional:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,11 +30,55 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm check
+      - name: Type and lint checks
+        run: pnpm verify
 
       - run: pnpm test:unit -- --run
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
 
-      - run: pnpm test:e2e
+      - name: Cross-browser functional and accessibility tests
+        run: pnpm test:e2e:functional
+
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-functional-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+  visual:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pnpm via corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install visual-test browsers
+        run: pnpm exec playwright install chromium firefox webkit
+
+      - name: Compare cross-browser screenshots
+        run: pnpm test:visual
+
+      - name: Upload visual diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-visual-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
