@@ -1,0 +1,29 @@
+# loopr — https://loopr.willcsoftware.com
+# Search engine crawlers are welcome. AI training scrapers are not.
+# Note: robots.txt is a courtesy convention, not an enforcement mechanism.
+
+User-agent: *
+Allow: /
+
+# AI training scrapers and data-collection bots
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: anthropic-ai
+User-agent: CCBot
+User-agent: Google-Extended
+User-agent: PerplexityBot
+User-agent: Bytespider
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: meta-externalfetcher
+User-agent: cohere-ai
+User-agent: Diffbot
+User-agent: ImagesiftBot
+User-agent: img2dataset
+User-agent: Timpibot
+User-agent: YouBot
+Disallow: /
+
+Sitemap: https://loopr.willcsoftware.com/sitemap.xml

@@ -1,0 +1,8 @@
+# humans.txt — real humans made this site.
+
+WillC Software House — https://willc.pro
+Site: https://loopr.willcsoftware.com
+Source: https://github.com/WillCraig/loopr
+Built with: SvelteKit, TypeScript, Vite — deployed to GitHub Pages
+License: MIT
+Thanks: the open-source GPS/cycling tooling community, and every rider who sent feedback.

@@ -10,7 +10,8 @@
 	</div>
 	<div class="right">
 		<a href="https://willc.pro" target="_blank" rel="noreferrer noopener">willc.pro</a>
-		<a href="https://github.com/WillCSH/loopr" target="_blank" rel="noreferrer noopener">source ↗</a
+		<a href="https://github.com/WillCraig/loopr" target="_blank" rel="noreferrer noopener"
+			>source ↗</a
 		>
 	</div>
 </footer>
