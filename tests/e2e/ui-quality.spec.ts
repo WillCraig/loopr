@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 async function loadSample(page: import('@playwright/test').Page) {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.getByTestId('sample-button').click();
 	await expect(page.getByTestId('summary')).toBeVisible();
 }
@@ -18,12 +18,12 @@ test('the app and its essential assets are available without browser errors', as
 		if (response.status() >= 400) failedResponses.push(`${response.status()} ${response.url()}`);
 	});
 
-	const response = await page.goto('/');
+	const response = await page.goto('/loopr/');
 	expect(response?.status()).toBe(200);
 	await expect(page).toHaveTitle(/loopr/i);
 	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 		'href',
-		'https://loopr.willcsoftware.com/'
+		'https://willcraig.github.io/loopr/'
 	);
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Repeat any loop');
 	await expect(page.getByRole('button', { name: /Drop your GPX file/i })).toBeVisible();
@@ -52,7 +52,7 @@ test('the core UI journey works', async ({ page }) => {
 test('the empty and populated screens have no serious accessibility violations', async ({
 	page
 }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	const empty = await new AxeBuilder({ page }).analyze();
 	expect(
 		empty.violations.filter(({ impact }) => impact === 'serious' || impact === 'critical')
@@ -67,7 +67,7 @@ test('the empty and populated screens have no serious accessibility violations',
 });
 
 test('keyboard activation works for the primary controls', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	const kilometers = page.getByRole('radio', { name: 'km', exact: true });
 	await kilometers.focus();
 	await expect(kilometers).toBeFocused();
