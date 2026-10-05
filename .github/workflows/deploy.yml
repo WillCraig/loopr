@@ -38,7 +38,18 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm build
+      - name: Build for GitHub Pages
+        run: pnpm build
+        env:
+          BASE_PATH: /loopr
+          PUBLIC_SITE_ORIGIN: https://willcraig.github.io
+          # Repository variables. Leave unset to ship without analytics.
+          # These values are public in the page; they are not secrets.
+          PUBLIC_ANALYTICS_PROVIDER: ${{ vars.PUBLIC_ANALYTICS_PROVIDER }}
+          PUBLIC_GOATCOUNTER_ENDPOINT: ${{ vars.PUBLIC_GOATCOUNTER_ENDPOINT }}
+          PUBLIC_PLAUSIBLE_DOMAIN: ${{ vars.PUBLIC_PLAUSIBLE_DOMAIN }}
+          PUBLIC_PLAUSIBLE_SCRIPT: ${{ vars.PUBLIC_PLAUSIBLE_SCRIPT }}
+          PUBLIC_CF_BEACON_TOKEN: ${{ vars.PUBLIC_CF_BEACON_TOKEN }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
