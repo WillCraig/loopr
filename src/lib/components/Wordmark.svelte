@@ -22,9 +22,10 @@
 	style:--wordmark-size="{size}px"
 	style:--wordmark-gap="{size * 0.055}px"
 	style:color
+	role="img"
 	aria-label="loopr"
 >
-	<span class="wordmark-letter wordmark-l">l</span>
+	<span class="wordmark-letter wordmark-l" aria-hidden="true">l</span>
 	<svg
 		class="wordmark-loops"
 		width={svgWidth}
@@ -49,5 +50,5 @@
 			stroke-width={stroke}
 		/>
 	</svg>
-	<span class="wordmark-letter wordmark-pr">pr</span>
+	<span class="wordmark-letter wordmark-pr" aria-hidden="true">pr</span>
 </div>

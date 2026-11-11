@@ -29,7 +29,12 @@
 				]
 			}
 		</script>
+		<link rel="icon" href="%sveltekit.assets%/favicon.ico" sizes="32x32" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
+		<link rel="manifest" href="%sveltekit.assets%/site.webmanifest" />
+		<meta name="theme-color" content="#ece5d3" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#15130f" media="(prefers-color-scheme: dark)" />
 		<script>
 			// Honour prefers-color-scheme on first paint. No UI toggle in v1;
 			// the route-workshop palette follows the rider's system setting.
@@ -42,12 +47,25 @@
 			}
 		</script>
 		%sveltekit.head%
+		<!-- GoatCounter analytics (cookieless) — the one config spot is the
+		     data-goatcounter URL below.
+		     TODO(Will): confirm "willcraig" is the right GoatCounter site
+		     code and that counts arrive for production traffic (see #5);
+		     swap the subdomain here if not. Skipped on localhost / preview
+		     hosts so dev traffic is never counted. -->
+		<script>
+			if (
+				!['localhost', '127.0.0.1', '[::1]', ''].includes(location.hostname) &&
+				!location.hostname.endsWith('.local')
+			) {
+				var gc = document.createElement('script');
+				gc.async = true;
+				gc.src = '//gc.zgo.at/count.js';
+				gc.dataset.goatcounter = 'https://willcraig.goatcounter.com/count';
+				document.head.appendChild(gc);
+			}
+		</script>
 	</head>
-	<script
-		data-goatcounter="https://willcraig.goatcounter.com/count"
-		async
-		src="//gc.zgo.at/count.js"
-	></script>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>

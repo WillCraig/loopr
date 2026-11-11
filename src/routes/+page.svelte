@@ -404,6 +404,9 @@
 		content="Free GPX loop repeater for cyclists, triathlon bike legs, and crit race courses. Drop a GPX of one circuit, set laps or a distance target, download a stitched GPX for Garmin, Wahoo, or Strava. Runs in your browser."
 	/>
 	<meta property="og:image" content="https://loopr.willcsoftware.com/og-image.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content="loopr — repeat any GPX loop into a longer ride" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta
 		name="twitter:title"
@@ -414,6 +417,7 @@
 		content="Free GPX loop repeater for cyclists, triathlon bike legs, and crit race courses. Drop a GPX of one circuit, set laps or a distance target, download a stitched GPX for Garmin, Wahoo, or Strava. Runs in your browser."
 	/>
 	<meta name="twitter:image" content="https://loopr.willcsoftware.com/og-image.png" />
+	<meta name="twitter:image:alt" content="loopr — repeat any GPX loop into a longer ride" />
 </svelte:head>
 
 <div class="page">
@@ -422,135 +426,137 @@
 		<UnitsToggle {units} onChange={(u) => (units = u)} />
 	</header>
 
-	<section class="hero container">
-		<PrivacyCallout placement="above" />
-		<div class="eyebrow eyebrow-accent">A free tool for cyclists</div>
-		<h1>Repeat any loop into a <em>longer ride</em>.</h1>
-		<p class="hero-sub">
-			Drop a GPX of one loop, choose how many times to ride it, download a new GPX you can import
-			into Strava, Ride With GPS, Garmin Connect, or Wahoo.
-		</p>
-	</section>
+	<main id="main" tabindex="-1">
+		<section class="hero container">
+			<PrivacyCallout placement="above" />
+			<div class="eyebrow eyebrow-accent">A free tool for cyclists</div>
+			<h1>Repeat any loop into a <em>longer ride</em>.</h1>
+			<p class="hero-sub">
+				Drop a GPX of one loop, choose how many times to ride it, download a new GPX you can import
+				into Strava, Ride With GPS, Garmin Connect, or Wahoo.
+			</p>
+		</section>
 
-	<section class="section container">
-		<div class="section-head">
-			<span class="section-num">01 — Route</span>
-			<h2 class="section-title">Drop the loop you want to repeat.</h2>
-		</div>
-		<DropZone
-			{dropState}
-			{units}
-			loaded={loadedSummary}
-			{error}
-			onFile={handleFile}
-			onSample={handleSample}
-			onClear={handleClear}
-		/>
-		{#if parsed && isP2P}
-			<OutAndBackCallout
-				gapMeters={p2pGapMeters}
-				oneWayMeters={loadedSummary?.distanceMeters ?? 0}
+		<section class="section container">
+			<div class="section-head">
+				<span class="section-num">01 — Route</span>
+				<h2 class="section-title">Drop the loop you want to repeat.</h2>
+			</div>
+			<DropZone
+				{dropState}
 				{units}
-				on={outAndBackOn}
-				onToggle={(v) => (outAndBackOn = v)}
+				loaded={loadedSummary}
+				{error}
+				onFile={handleFile}
+				onSample={handleSample}
+				onClear={handleClear}
 			/>
-		{/if}
-	</section>
-
-	<section class="section container">
-		<div class="section-head">
-			<span class="section-num">01b — Commute</span>
-			<h2 class="section-title">Riding to the loop? (optional)</h2>
-		</div>
-		<div class="commute-disclosure">
-			<button
-				type="button"
-				class="rename-toggle"
-				aria-expanded={commuteEnabled}
-				data-testid="commute-toggle"
-				onclick={() => (commuteEnabled = !commuteEnabled)}
-			>
-				<span class="chev">▸</span>
-				Add a commute to/from the loop
-			</button>
-			{#if commuteEnabled}
-				<DropZone
-					dropState={commuteDropState}
+			{#if parsed && isP2P}
+				<OutAndBackCallout
+					gapMeters={p2pGapMeters}
+					oneWayMeters={loadedSummary?.distanceMeters ?? 0}
 					{units}
-					loaded={commuteLoaded}
-					error={commuteError}
-					showSample={false}
-					onFile={handleCommuteFile}
-					onClear={handleCommuteClear}
+					on={outAndBackOn}
+					onToggle={(v) => (outAndBackOn = v)}
 				/>
-				<p class="commute-hint">Used for the ride out; reversed for the ride home.</p>
 			{/if}
-		</div>
-	</section>
+		</section>
 
-	<section class="section container">
-		<div class="section-head">
-			<span class="section-num">02 — Laps</span>
-			<h2 class="section-title">How long do you want to ride?</h2>
-		</div>
-		<LapConfig
-			{mode}
-			{laps}
-			{minDistance}
-			{units}
-			outAndBack={oabActive}
-			{lapDistanceMeters}
-			{commuteDistanceMeters}
-			{minDistInclCommute}
-			{minElevation}
-			{minElevInclCommute}
-			{lapGainMeters}
-			commuteGainMeters={commuteGainRoundTripMeters}
-			{addMarkers}
-			{customName}
-			nameSuggestion={defaultRidename}
-			{renameOpen}
-			onMode={(m) => (mode = m)}
-			onLaps={(n) => (laps = n)}
-			onMinDistance={(v) => (minDistance = v)}
-			onMinDistInclCommute={(v) => (minDistInclCommute = v)}
-			onMinElevation={(v) => (minElevation = v)}
-			onMinElevInclCommute={(v) => (minElevInclCommute = v)}
-			onAddMarkers={(v) => (addMarkers = v)}
-			onCustomName={(v) => (customName = v)}
-			onRenameOpen={(v) => (renameOpen = v)}
-		/>
-	</section>
+		<section class="section container">
+			<div class="section-head">
+				<span class="section-num">01b — Commute</span>
+				<h2 class="section-title">Riding to the loop? (optional)</h2>
+			</div>
+			<div class="commute-disclosure">
+				<button
+					type="button"
+					class="rename-toggle"
+					aria-expanded={commuteEnabled}
+					data-testid="commute-toggle"
+					onclick={() => (commuteEnabled = !commuteEnabled)}
+				>
+					<span class="chev">▸</span>
+					Add a commute to/from the loop
+				</button>
+				{#if commuteEnabled}
+					<DropZone
+						dropState={commuteDropState}
+						{units}
+						loaded={commuteLoaded}
+						error={commuteError}
+						showSample={false}
+						onFile={handleCommuteFile}
+						onClear={handleCommuteClear}
+					/>
+					<p class="commute-hint">Used for the ride out; reversed for the ride home.</p>
+				{/if}
+			</div>
+		</section>
 
-	<section class="section container">
-		<div class="section-head">
-			<span class="section-num">03 — Review</span>
-			<h2 class="section-title">What you'll actually ride.</h2>
-		</div>
-		<SummaryBanner view={summaryView} {units} />
-	</section>
+		<section class="section container">
+			<div class="section-head">
+				<span class="section-num">02 — Laps</span>
+				<h2 class="section-title">How long do you want to ride?</h2>
+			</div>
+			<LapConfig
+				{mode}
+				{laps}
+				{minDistance}
+				{units}
+				outAndBack={oabActive}
+				{lapDistanceMeters}
+				{commuteDistanceMeters}
+				{minDistInclCommute}
+				{minElevation}
+				{minElevInclCommute}
+				{lapGainMeters}
+				commuteGainMeters={commuteGainRoundTripMeters}
+				{addMarkers}
+				{customName}
+				nameSuggestion={defaultRidename}
+				{renameOpen}
+				onMode={(m) => (mode = m)}
+				onLaps={(n) => (laps = n)}
+				onMinDistance={(v) => (minDistance = v)}
+				onMinDistInclCommute={(v) => (minDistInclCommute = v)}
+				onMinElevation={(v) => (minElevation = v)}
+				onMinElevInclCommute={(v) => (minElevInclCommute = v)}
+				onAddMarkers={(v) => (addMarkers = v)}
+				onCustomName={(v) => (customName = v)}
+				onRenameOpen={(v) => (renameOpen = v)}
+			/>
+		</section>
 
-	<section class="section container">
-		<div class="section-head">
-			<span class="section-num">04 — Save</span>
-			<h2 class="section-title">Take it with you.</h2>
-		</div>
-		<DownloadButton
-			enabled={downloadEnabled}
-			{ridename}
-			{disabledReason}
-			onClick={handleDownload}
-		/>
-	</section>
+		<section class="section container">
+			<div class="section-head">
+				<span class="section-num">03 — Review</span>
+				<h2 class="section-title">What you'll actually ride.</h2>
+			</div>
+			<SummaryBanner view={summaryView} {units} />
+		</section>
 
-	<!--   TODO: consider placing this back in  -->
-	<!-- <section class="section container"> -->
-	<!-- 	<div class="section-head"> -->
-	<!-- 		<span class="section-num">How to use this</span> -->
-	<!-- 		<h2 class="section-title">Get the file onto your bike.</h2> -->
-	<!-- 	</div> -->
-	<!-- 	<HowToUse /> -->
-	<!-- </section> -->
+		<section class="section container">
+			<div class="section-head">
+				<span class="section-num">04 — Save</span>
+				<h2 class="section-title">Take it with you.</h2>
+			</div>
+			<DownloadButton
+				enabled={downloadEnabled}
+				{ridename}
+				{disabledReason}
+				onClick={handleDownload}
+			/>
+		</section>
+
+		<!--   TODO: consider placing this back in  -->
+		<!-- <section class="section container"> -->
+		<!-- 	<div class="section-head"> -->
+		<!-- 		<span class="section-num">How to use this</span> -->
+		<!-- 		<h2 class="section-title">Get the file onto your bike.</h2> -->
+		<!-- 	</div> -->
+		<!-- 	<HowToUse /> -->
+		<!-- </section> -->
+	</main>
 
 	<SiteFooter />
 </div>
