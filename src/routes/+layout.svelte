@@ -16,4 +16,6 @@
 	<link rel="preload" href={geistRegularUrl} as="font" type="font/woff2" crossorigin="anonymous" />
 </svelte:head>
 
+<a class="skip-link" href="#main">Skip to main content</a>
+
 {@render children()}

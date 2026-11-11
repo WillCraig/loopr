@@ -80,6 +80,7 @@
 			type="button"
 			class="dropzone {dragging ? 'is-dragging' : ''} {dropState === 'error' ? 'is-error' : ''}"
 			aria-label="Drop your GPX file here, or click to choose"
+			aria-busy={dropState === 'loading'}
 			data-testid="dropzone"
 			onclick={() => inputEl?.click()}
 			ondragover={(e) => {
@@ -130,9 +131,13 @@
 				<span>up to 50,000 points</span>
 			</span>
 		</button>
+		<span class="sr-only" role="status">
+			{dropState === 'loading' ? 'Reading file…' : ''}
+		</span>
 		<input
 			bind:this={inputEl}
 			type="file"
+			aria-label="Choose a GPX file"
 			accept=".gpx,application/gpx+xml,application/xml,text/xml"
 			style="display: none"
 			data-testid="file-input"

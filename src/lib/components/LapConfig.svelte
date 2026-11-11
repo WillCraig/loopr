@@ -356,7 +356,9 @@
 				Rename this route (optional)
 			</button>
 			{#if renameOpen}
+				<label class="sr-only" for="rename-input">Route name</label>
 				<input
+					id="rename-input"
 					class="rename-input"
 					value={customName}
 					placeholder={nameSuggestion}

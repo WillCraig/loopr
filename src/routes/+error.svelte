@@ -23,12 +23,14 @@
 		<Wordmark size={30} />
 	</header>
 
-	<section class="hero container">
-		<div class="eyebrow eyebrow-accent">Error {page.status}</div>
-		<h1>{heading}</h1>
-		<p class="hero-sub">{detail}</p>
-		<a class="btn-primary" href={resolve('/')}>Back to loopr</a>
-	</section>
+	<main id="main" tabindex="-1">
+		<section class="hero container">
+			<div class="eyebrow eyebrow-accent">Error {page.status}</div>
+			<h1>{heading}</h1>
+			<p class="hero-sub">{detail}</p>
+			<a class="btn-primary" href={resolve('/')}>Back to loopr</a>
+		</section>
+	</main>
 
 	<SiteFooter />
 </div>
