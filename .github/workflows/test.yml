@@ -9,6 +9,7 @@ on:
 jobs:
   functional:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +36,19 @@ jobs:
 
       - run: pnpm test:unit -- --run
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+          restore-keys: playwright-${{ runner.os }}-
+
       - name: Install Playwright browsers
+        timeout-minutes: 10
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Cross-browser functional and accessibility tests
@@ -52,7 +65,12 @@ jobs:
           retention-days: 14
 
   visual:
-    runs-on: macos-26
+    # Baselines are macOS renders. Run on the self-hosted Mac, never a
+    # GitHub-hosted macos-* runner. Register a loopr runner once with
+    # labels self-hosted, macOS, ARM64, loopr (same pattern as the other
+    # repos). Until that runner exists, this job will wait.
+    runs-on: [self-hosted, macOS, ARM64, loopr]
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -67,7 +85,19 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+          restore-keys: playwright-${{ runner.os }}-
+
       - name: Install visual-test browsers
+        timeout-minutes: 10
         run: pnpm exec playwright install chromium firefox webkit
 
       - name: Compare cross-browser screenshots
