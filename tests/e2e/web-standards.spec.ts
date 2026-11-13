@@ -68,3 +68,16 @@ test('unknown paths get the branded 404 page', async ({ request }) => {
 	expect(body).toContain('That route is off the map.');
 	expect(body).toContain('Back to loopr');
 });
+
+test('privacy page covers in-browser GPX processing and GoatCounter', async ({ request }) => {
+	const response = await request.get('/privacy');
+	expect(response.status()).toBe(200);
+	const body = await response.text();
+	expect(body).toContain('Processed only in your browser.');
+	expect(body).toContain('GoatCounter');
+	expect(body).toContain('no cookies');
+	expect(body).toContain('does not store IP addresses');
+
+	const sitemap = await request.get('/sitemap.xml');
+	expect(await sitemap.text()).toContain('<loc>https://loopr.willcsoftware.com/privacy</loc>');
+});
