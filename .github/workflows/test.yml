@@ -111,14 +111,16 @@ jobs:
         timeout-minutes: 10
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
-      # Temporary: always refresh baselines on this commit so we can download
-      # Linux screenshots that match ubuntu-latest. The follow-up commit
-      # switches this job back to compare-only.
+      - name: Compare cross-browser screenshots
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.update_snapshots != 'true' }}
+        run: pnpm test:visual
+
       - name: Update visual screenshot baselines
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.update_snapshots == 'true' }}
         run: pnpm test:visual:update
 
       - name: Upload updated screenshots
-        if: always()
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.update_snapshots == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: updated-screenshots
