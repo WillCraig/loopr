@@ -14,7 +14,8 @@ on:
 
 jobs:
   functional:
-    runs-on: ubuntu-latest
+    # ubuntu-latest is 26.04, which Playwright 1.59.1 cannot install browsers on.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -71,9 +72,10 @@ jobs:
           retention-days: 14
 
   visual:
-    # Visual baselines are Linux renders. Run on ubuntu-latest, never a
-    # GitHub-hosted macos-* runner and never the self-hosted Mac.
-    runs-on: ubuntu-latest
+    # Visual baselines are Linux renders. ubuntu-latest is 26.04, which
+    # Playwright 1.59.1 cannot install browsers on, so stay on 24.04.
+    # Never a GitHub-hosted macos-* runner and never the self-hosted Mac.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
