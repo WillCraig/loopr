@@ -11,13 +11,13 @@ function gpxBuffer(name: string): Buffer {
 }
 
 test('page loads with empty drop zone visible', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await expect(page.getByRole('heading', { name: /Repeat any loop/i })).toBeVisible();
 	await expect(page.getByText('Drop your route here')).toBeVisible();
 });
 
 test('uploading simple_loop.gpx populates the summary card', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',
@@ -29,7 +29,7 @@ test('uploading simple_loop.gpx populates the summary card', async ({ page }) =>
 });
 
 test('changing laps updates summary in real time', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',
@@ -42,7 +42,7 @@ test('changing laps updates summary in real time', async ({ page }) => {
 });
 
 test('toggling lap waypoints does not crash and keeps the summary stable', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',
@@ -60,7 +60,7 @@ test('toggling lap waypoints does not crash and keeps the summary stable', async
 });
 
 test('switching units updates displayed values', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',
@@ -73,7 +73,7 @@ test('switching units updates displayed values', async ({ page }) => {
 });
 
 test('download button produces a file with expected name', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',
@@ -87,7 +87,7 @@ test('download button produces a file with expected name', async ({ page }) => {
 });
 
 test('downloaded file parses back to a valid GPX with expected point count', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',
@@ -109,7 +109,7 @@ test('downloaded file parses back to a valid GPX with expected point count', asy
 });
 
 test('uploading no_track.gpx shows the "no track" error inline', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'no_track.gpx',
 		mimeType: 'application/gpx+xml',
@@ -119,7 +119,7 @@ test('uploading no_track.gpx shows the "no track" error inline', async ({ page }
 });
 
 test('uploading malformed GPX shows the parse error inline', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'broken.gpx',
 		mimeType: 'application/gpx+xml',
@@ -131,7 +131,7 @@ test('uploading malformed GPX shows the parse error inline', async ({ page }) =>
 test('adding a commute extends total distance and writes a -with-commute filename', async ({
 	page
 }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page
 		.locator('[data-testid="file-input"]')
 		.first()
@@ -163,7 +163,7 @@ test('adding a commute extends total distance and writes a -with-commute filenam
 });
 
 test('point-to-point route shows the out-and-back callout, defaulted on', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'point_to_point.gpx',
 		mimeType: 'application/gpx+xml',
@@ -180,7 +180,7 @@ test('point-to-point route shows the out-and-back callout, defaulted on', async 
 });
 
 test('loop route never shows the out-and-back callout', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',
@@ -191,7 +191,7 @@ test('loop route never shows the out-and-back callout', async ({ page }) => {
 });
 
 test('switching the callout to one-way undoes the conversion', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'point_to_point.gpx',
 		mimeType: 'application/gpx+xml',
@@ -206,7 +206,7 @@ test('switching the callout to one-way undoes the conversion', async ({ page }) 
 });
 
 test('return-leg arrowhead is solid so its point survives the dash pattern', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'point_to_point.gpx',
 		mimeType: 'application/gpx+xml',
@@ -226,7 +226,7 @@ test('return-leg arrowhead is solid so its point survives the dash pattern', asy
 });
 
 test('out-and-back download mirrors the route and names it accordingly', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'point_to_point.gpx',
 		mimeType: 'application/gpx+xml',
@@ -250,7 +250,7 @@ test('out-and-back download mirrors the route and names it accordingly', async (
 });
 
 test('minDistance mode shows live "→ N laps → X mi" hint', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',
@@ -264,7 +264,7 @@ test('minDistance mode shows live "→ N laps → X mi" hint', async ({ page }) 
 });
 
 test('elevation mode shows live climbing and Everest hint', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/loopr/');
 	await page.locator('[data-testid="file-input"]').setInputFiles({
 		name: 'simple_loop.gpx',
 		mimeType: 'application/gpx+xml',

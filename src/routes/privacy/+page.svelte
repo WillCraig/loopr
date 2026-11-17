@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { base, resolve } from '$app/paths';
+	import { currentHead } from '$lib/public-config';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
 	import Wordmark from '$lib/components/Wordmark.svelte';
+
+	const privacyUrl = `${currentHead(base).root}privacy`;
 </script>
 
 <svelte:head>
@@ -10,7 +13,7 @@
 		name="description"
 		content="How loopr handles your GPX files and what its cookieless GoatCounter analytics record."
 	/>
-	<link rel="canonical" href="https://loopr.willcsoftware.com/privacy" />
+	<link rel="canonical" href={privacyUrl} />
 </svelte:head>
 
 <div class="page">

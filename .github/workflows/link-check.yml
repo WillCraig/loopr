@@ -1,0 +1,29 @@
+name: link-check
+
+on:
+  schedule:
+    # Mondays, after the weekend. Checks the deployed site, not the PR build.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the live site and README links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          fail: true
+          args: >-
+            --verbose
+            --no-progress
+            --max-retries 2
+            --timeout 20
+            --accept 200,206,429
+            README.md
+            https://willcraig.github.io/loopr/
