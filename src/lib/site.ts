@@ -148,6 +148,7 @@ export function jsonLdScript(data: Record<string, unknown>): string {
 export function robotsTxt(root: string): string {
 	return `# loopr — ${root}
 # Search engine crawlers are welcome. AI training scrapers are not.
+# AI assistants fetching a page on behalf of a user asking a question are welcome.
 # robots.txt is a courtesy convention, not an enforcement mechanism.
 #
 # GitHub Pages project sites: this file is published at ${root}robots.txt
@@ -159,19 +160,13 @@ export function robotsTxt(root: string): string {
 User-agent: *
 Allow: /
 
-# AI training scrapers and data-collection bots
+# AI training scrapers and data-collection bots — keep blocked
 User-agent: GPTBot
-User-agent: ChatGPT-User
-User-agent: ClaudeBot
-User-agent: Claude-Web
 User-agent: anthropic-ai
+User-agent: ClaudeBot
 User-agent: CCBot
 User-agent: Google-Extended
-User-agent: PerplexityBot
 User-agent: Bytespider
-User-agent: Applebot-Extended
-User-agent: meta-externalagent
-User-agent: meta-externalfetcher
 User-agent: cohere-ai
 User-agent: Diffbot
 User-agent: ImagesiftBot
@@ -179,6 +174,15 @@ User-agent: img2dataset
 User-agent: Timpibot
 User-agent: YouBot
 Disallow: /
+
+# AI assistants fetching on behalf of a user — explicitly allowed
+User-agent: ChatGPT-User
+User-agent: Claude-Web
+User-agent: PerplexityBot
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: meta-externalfetcher
+Allow: /
 
 Sitemap: ${root}sitemap.xml
 `;
@@ -191,6 +195,11 @@ export function sitemapXml(root: string): string {
     <loc>${root}</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${root}privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>
 `;
@@ -249,19 +258,34 @@ export function resolveAnalytics(env: AnalyticsEnv): Analytics | null {
 	return { provider: 'cloudflare', token };
 }
 
-function escapeAttr(value: string): string {
-	return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-}
+const LOCAL_SKIP = `!['localhost', '127.0.0.1', '[::1]', ''].includes(location.hostname) && !location.hostname.endsWith('.local')`;
 
-/** HTML for the chosen analytics snippet. Empty when analytics is off. */
+/** HTML for the chosen analytics snippet. Empty when analytics is off. Skips local hosts. */
 export function analyticsSnippet(analytics: Analytics | null): string {
 	if (!analytics) return '';
+	let inject: string;
 	if (analytics.provider === 'goatcounter') {
-		return `<script data-loopr-analytics async src="https://gc.zgo.at/count.js" data-goatcounter="${escapeAttr(analytics.endpoint)}"></script>`;
+		inject = `var gc = document.createElement('script');
+			gc.async = true;
+			gc.src = 'https://gc.zgo.at/count.js';
+			gc.dataset.goatcounter = ${JSON.stringify(analytics.endpoint)};
+			document.head.appendChild(gc);`;
+	} else if (analytics.provider === 'plausible') {
+		inject = `var s = document.createElement('script');
+			s.defer = true;
+			s.dataset.domain = ${JSON.stringify(analytics.domain)};
+			s.src = ${JSON.stringify(analytics.script)};
+			document.head.appendChild(s);`;
+	} else {
+		inject = `var s = document.createElement('script');
+			s.defer = true;
+			s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+			s.dataset.cfBeacon = ${JSON.stringify(JSON.stringify({ token: analytics.token }))};
+			document.head.appendChild(s);`;
 	}
-	if (analytics.provider === 'plausible') {
-		return `<script data-loopr-analytics defer data-domain="${escapeAttr(analytics.domain)}" src="${escapeAttr(analytics.script)}"></script>`;
-	}
-	const beacon = escapeAttr(JSON.stringify({ token: analytics.token }));
-	return `<script data-loopr-analytics defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="${beacon}"></script>`;
+	return `<script data-loopr-analytics>
+		if (${LOCAL_SKIP}) {
+			${inject}
+		}
+	</script>`;
 }

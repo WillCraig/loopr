@@ -13,8 +13,6 @@
 	<link rel="canonical" href={head.root} />
 	<link rel="sitemap" type="application/xml" href="{head.root}sitemap.xml" />
 	<meta name="robots" content="index, follow" />
-	<meta name="theme-color" content="#ece5d3" media="(prefers-color-scheme: light)" />
-	<meta name="theme-color" content="#15130f" media="(prefers-color-scheme: dark)" />
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="loopr" />
 	<meta property="og:locale" content="en_US" />

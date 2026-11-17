@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+
 	interface Props {
 		placement?: 'above' | 'below';
 	}
@@ -21,5 +23,6 @@
 			stroke-linejoin="round"
 		/>
 	</svg>
-	<span>Your file never leaves this browser</span>
+	<span>Your file never leaves this browser ·</span>
+	<a href={resolve('/privacy')}>Privacy</a>
 </div>

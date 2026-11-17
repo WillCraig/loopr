@@ -39,7 +39,11 @@ test('robots and sitemap advertise the project with absolute URLs', () => {
 	expect(robots).toContain('User-agent: GPTBot');
 	expect(robots).toContain('Disallow: /');
 	expect(robots).toContain(`Sitemap: ${root}sitemap.xml`);
-	expect(sitemapXml(root)).toContain(`<loc>${root}</loc>`);
+	expect(robots).toContain('User-agent: ChatGPT-User');
+	expect(robots).not.toContain('User-agent: ChatGPT-User\nDisallow:');
+	const sitemap = sitemapXml(root);
+	expect(sitemap).toContain(`<loc>${root}</loc>`);
+	expect(sitemap).toContain(`<loc>${root}privacy</loc>`);
 	expect(securityTxt(root)).toContain(`Canonical: ${root}.well-known/security.txt`);
 	expect(humansTxt(root)).toContain(`Site: ${root}`);
 });

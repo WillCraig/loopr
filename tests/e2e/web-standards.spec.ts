@@ -8,17 +8,52 @@ test('robots.txt allows search engines and blocks AI training scrapers', async (
 	const body = await response.text();
 	expect(body).toContain('User-agent: *');
 	expect(body).toContain('Allow: /');
-	for (const bot of ['GPTBot', 'ClaudeBot', 'CCBot', 'Google-Extended', 'PerplexityBot']) {
-		expect(body).toContain(`User-agent: ${bot}`);
+
+	// Groups are separated by blank lines; check each bot lands in the right one (#1).
+	const groups = body.split(/\n\s*\n/).filter((g) => g.includes('User-agent:'));
+	const groupFor = (bot: string) => groups.find((g) => g.includes(`User-agent: ${bot}`)) ?? '';
+	for (const bot of ['GPTBot', 'ClaudeBot', 'CCBot', 'Google-Extended', 'Bytespider']) {
+		expect(groupFor(bot), `${bot} should be disallowed`).toContain('Disallow: /');
 	}
-	expect(body).toContain('Disallow: /');
+	// Assistant fetch bots retrieve a page for a user asking a question — allowed.
+	for (const bot of [
+		'ChatGPT-User',
+		'Claude-Web',
+		'PerplexityBot',
+		'Applebot-Extended',
+		'meta-externalagent',
+		'meta-externalfetcher'
+	]) {
+		expect(groupFor(bot), `${bot} should be allowed`).toContain('Allow: /');
+		expect(groupFor(bot)).not.toContain('Disallow:');
+	}
 	expect(body).toContain(`Sitemap: ${root}sitemap.xml`);
 });
 
-test('sitemap lists the project URL', async ({ request }) => {
+test('sitemap lists the project and privacy URLs', async ({ request }) => {
 	const response = await request.get('/loopr/sitemap.xml');
 	expect(response.status()).toBe(200);
-	expect(await response.text()).toContain(`<loc>${root}</loc>`);
+	const body = await response.text();
+	expect(body).toContain(`<loc>${root}</loc>`);
+	expect(body).toContain(`<loc>${root}privacy</loc>`);
+});
+
+test('favicon set and web manifest are served', async ({ request }) => {
+	for (const path of [
+		'/loopr/favicon.svg',
+		'/loopr/favicon.ico',
+		'/loopr/apple-touch-icon.png',
+		'/loopr/icon-192.png',
+		'/loopr/icon-512.png'
+	]) {
+		const response = await request.get(path);
+		expect(response.status(), path).toBe(200);
+	}
+	const manifest = await request.get('/loopr/site.webmanifest');
+	expect(manifest.status()).toBe(200);
+	const json = await manifest.json();
+	expect(json.short_name).toBe('loopr');
+	expect(json.icons.length).toBeGreaterThan(0);
 });
 
 test('security.txt is RFC 9116 compliant and served from /.well-known', async ({ request }) => {
@@ -64,4 +99,18 @@ test('unknown paths get the branded 404 page', async ({ request }) => {
 	expect(body).not.toContain('href="/_app/');
 	expect(body).not.toContain('src="/_app/');
 	expect(body).toContain('/loopr/');
+});
+
+test('privacy page covers in-browser GPX processing and GoatCounter', async ({ request }) => {
+	const response = await request.get('/loopr/privacy');
+	expect(response.status()).toBe(200);
+	const body = await response.text();
+	expect(body).toContain('Processed only in your browser.');
+	expect(body).toContain('GoatCounter');
+	expect(body).toContain('no cookies');
+	expect(body).toContain('does not store IP addresses');
+	expect(body).toContain(`<link rel="canonical" href="${root}privacy"/>`);
+
+	const sitemap = await request.get('/loopr/sitemap.xml');
+	expect(await sitemap.text()).toContain(`<loc>${root}privacy</loc>`);
 });

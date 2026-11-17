@@ -5,10 +5,17 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: Update visual screenshot baselines
+        type: boolean
+        default: false
 
 jobs:
   functional:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +42,19 @@ jobs:
 
       - run: pnpm test:unit -- --run
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+          restore-keys: playwright-${{ runner.os }}-
+
       - name: Install Playwright browsers
+        timeout-minutes: 10
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Cross-browser functional and accessibility tests
@@ -52,7 +71,10 @@ jobs:
           retention-days: 14
 
   visual:
-    runs-on: macos-26
+    # Visual baselines are Linux renders. Run on ubuntu-latest, never a
+    # GitHub-hosted macos-* runner and never the self-hosted Mac.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -65,13 +87,45 @@ jobs:
           corepack enable
           corepack prepare pnpm@latest --activate
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
       - run: pnpm install --frozen-lockfile
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+          restore-keys: playwright-${{ runner.os }}-
+
       - name: Install visual-test browsers
-        run: pnpm exec playwright install chromium firefox webkit
+        timeout-minutes: 10
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Compare cross-browser screenshots
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.update_snapshots != 'true' }}
         run: pnpm test:visual
+
+      - name: Update visual screenshot baselines
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.update_snapshots == 'true' }}
+        run: pnpm test:visual:update
+
+      - name: Upload updated screenshots
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.update_snapshots == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: updated-screenshots
+          path: tests/e2e/__screenshots__/
+          retention-days: 3
 
       - name: Upload visual diffs
         if: failure()

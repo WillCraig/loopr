@@ -27,7 +27,12 @@ test('the app and its essential assets are available without browser errors', as
 	);
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Repeat any loop');
 	await expect(page.getByRole('button', { name: /Drop your GPX file/i })).toBeVisible();
+	await expect(page.getByRole('main')).toBeVisible();
 	await expect(page.getByRole('contentinfo')).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Skip to main content' })).toHaveAttribute(
+		'href',
+		'#main'
+	);
 
 	expect(failedResponses).toEqual([]);
 	expect(browserErrors).toEqual([]);

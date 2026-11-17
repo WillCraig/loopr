@@ -74,7 +74,7 @@ Set **one** of these at build time (shell export or `.env`). Values containing `
 
 If more than one is set, also set `PUBLIC_ANALYTICS_PROVIDER` to `goatcounter`, `plausible`, or `cloudflare`. `off` forces the snippet to stay out.
 
-For the GitHub Pages deploy, add the same names as **repository variables** (Settings → Secrets and variables → Actions → Variables), not secrets. They are embedded in public HTML. Push to `main` or re-run the deploy workflow after changing them. The footer stays "No analytics. No cookies." until a provider is actually enabled.
+For the GitHub Pages deploy, add the same names as **repository variables** (Settings → Secrets and variables → Actions → Variables), not secrets. They are embedded in public HTML. Push to `main` or re-run the deploy workflow after changing them. The footer still says "Cookieless analytics. No cookies." The visit counter itself stays out of the page until a provider is enabled, and it does not run on localhost.
 
 ## Search
 

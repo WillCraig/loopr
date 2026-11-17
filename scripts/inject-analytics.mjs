@@ -7,7 +7,7 @@ import { join } from 'node:path';
 
 const snippet =
 	readFileSync('build/index.html', 'utf8').match(
-		/<script\b[^>]*data-loopr-analytics[^>]*>\s*<\/script>/
+		/<script\b[^>]*data-loopr-analytics[\s\S]*?<\/script>/
 	)?.[0] ?? '';
 
 if (!snippet) {
