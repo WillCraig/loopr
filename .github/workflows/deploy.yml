@@ -17,29 +17,26 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version-file: .nvmrc
+          bun-version: 1.4.5
 
-      - name: Enable pnpm via corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
-
-      - name: Cache pnpm store
+      - name: Cache Bun install
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
 
-      - run: pnpm install --frozen-lockfile
+      - run: bun install --frozen-lockfile
 
       - name: Build for GitHub Pages
-        run: pnpm build
+        run: bun run build
         env:
           BASE_PATH: /loopr
           PUBLIC_SITE_ORIGIN: https://willcraig.github.io
@@ -58,6 +55,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

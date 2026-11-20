@@ -4,47 +4,48 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   build-and-unit:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version-file: .nvmrc
+          bun-version: 1.4.5
 
-      - name: Enable pnpm via corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
-
-      - name: Cache pnpm store
+      - name: Cache Bun install
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
 
-      - run: pnpm install --frozen-lockfile
+      - run: bun install --frozen-lockfile
 
       - name: Typecheck
-        run: pnpm check
+        run: bun run check
 
       - name: Unit tests
-        run: pnpm test:unit -- --run
+        run: bun run test:unit -- --run
 
       - name: Production build
-        run: pnpm build
+        run: bun run build
 
       # Preview, lychee, and Lighthouse share one step so the server
       # is not killed between GitHub Actions steps.
       - name: Preview, link check, and Lighthouse
         run: |
-          pnpm preview --host 127.0.0.1 --port 4173 > /tmp/loopr-preview.log 2>&1 &
+          bun run preview --host 127.0.0.1 --port 4173 > /tmp/loopr-preview.log 2>&1 &
           ready=0
           for _ in $(seq 1 40); do
             if curl -sf -o /dev/null http://127.0.0.1:4173/loopr/; then
@@ -70,7 +71,7 @@ jobs:
             http://127.0.0.1:4173/loopr/ \
             http://127.0.0.1:4173/loopr/robots.txt \
             http://127.0.0.1:4173/loopr/sitemap.xml
-          npx --yes @lhci/cli@0.15.1 autorun
+          bunx --yes @lhci/cli@0.15.1 autorun
 
       - name: Upload Lighthouse results
         if: failure()
