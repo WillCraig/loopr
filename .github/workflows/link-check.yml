@@ -6,12 +6,17 @@ on:
     - cron: '17 6 * * 1'
   workflow_dispatch:
 
+concurrency:
+  group: link-check-${{ github.workflow }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   live:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
