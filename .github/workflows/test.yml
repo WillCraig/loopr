@@ -12,6 +12,10 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   functional:
     # ubuntu-latest is 26.04, which Playwright 1.59.1 cannot install browsers on.
@@ -20,32 +24,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version-file: .nvmrc
+          bun-version: 1.4.5
 
-      - name: Enable pnpm via corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
-
-      - name: Cache pnpm store
+      - name: Cache Bun install
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
 
-      - run: pnpm install --frozen-lockfile
+      - run: bun install --frozen-lockfile
 
       - name: Type and lint checks
-        run: pnpm verify
+        run: bun run verify
 
-      - run: pnpm test:unit -- --run
+      - run: bun run test:unit -- --run
 
       - name: Get Playwright version
         id: playwright-version
-        run: echo "version=$(pnpm exec playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(bunx playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -56,10 +56,10 @@ jobs:
 
       - name: Install Playwright browsers
         timeout-minutes: 10
-        run: pnpm exec playwright install --with-deps chromium firefox webkit
+        run: bunx playwright install --with-deps chromium firefox webkit
 
       - name: Cross-browser functional and accessibility tests
-        run: pnpm test:e2e:functional
+        run: bun run test:e2e:functional
 
       - name: Upload browser diagnostics
         if: failure()
@@ -80,27 +80,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version-file: .nvmrc
+          bun-version: 1.4.5
 
-      - name: Enable pnpm via corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
-
-      - name: Cache pnpm store
+      - name: Cache Bun install
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
 
-      - run: pnpm install --frozen-lockfile
+      - run: bun install --frozen-lockfile
 
       - name: Get Playwright version
         id: playwright-version
-        run: echo "version=$(pnpm exec playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(bunx playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -111,15 +107,15 @@ jobs:
 
       - name: Install visual-test browsers
         timeout-minutes: 10
-        run: pnpm exec playwright install --with-deps chromium firefox webkit
+        run: bunx playwright install --with-deps chromium firefox webkit
 
       - name: Compare cross-browser screenshots
         if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.update_snapshots != 'true' }}
-        run: pnpm test:visual
+        run: bun run test:visual
 
       - name: Update visual screenshot baselines
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.update_snapshots == 'true' }}
-        run: pnpm test:visual:update
+        run: bun run test:visual:update
 
       - name: Upload updated screenshots
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.update_snapshots == 'true' }}

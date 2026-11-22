@@ -11,7 +11,7 @@ export default defineConfig({
 	outputDir: 'test-results/artifacts',
 	snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}{ext}',
 	webServer: {
-		command: 'pnpm build && pnpm preview',
+		command: 'bun run build && bun run preview',
 		port: 4173,
 		reuseExistingServer: !process.env.CI
 	},
