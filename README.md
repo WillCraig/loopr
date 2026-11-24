@@ -33,7 +33,7 @@ pnpm install
 pnpm dev
 ```
 
-Dev and preview use the project base path: [http://localhost:5173/loopr/](http://localhost:5173/loopr/).
+Dev and preview use the project base path: `http://localhost:5173/loopr/`.
 
 `BASE_PATH` defaults to `/loopr` in `svelte.config.js`. It is read from the shell, not from `.env`. For a host-root custom domain:
 
